@@ -80,7 +80,10 @@ foreach ($taskRelativePath in $taskRuntimeFiles) {
 	}
 	$taskDestinationPath = Join-Path $taskPackageRoot $taskRelativePath
 	New-Item -ItemType Directory -Path (Split-Path -Parent $taskDestinationPath) -Force | Out-Null
-	Copy-Item -LiteralPath $taskSourcePath -Destination $taskDestinationPath
+	$taskText = [System.IO.File]::ReadAllText($taskSourcePath)
+	$taskText = $taskText.Replace("`r`n", "`n").Replace("`r", "`n")
+	$taskUtf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
+	[System.IO.File]::WriteAllText($taskDestinationPath, $taskText, $taskUtf8WithoutBom)
 }
 
 Add-Type -AssemblyName System.IO.Compression
