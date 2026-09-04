@@ -1,14 +1,14 @@
-# Locale-Neutral Power BI and PHP 8.2 Design
+# Locale-Neutral Power BI and Broad PHP Compatibility Design
 
 ## Summary
 
-Release version 1.1.0 of the iTop extension and Power BI template with a stable, locale-neutral data contract. The report interface remains English, while refresh works for every iTop-supported left-to-right language. English, German, Dutch, and French are explicit test fixtures. The same release adds verified PHP 8.2 compatibility while retaining PHP 8.1.
+Release version 1.1.0 of the iTop extension and Power BI template with a stable, locale-neutral data contract. The report interface remains English, while refresh works for every iTop-supported left-to-right language. English, German, Dutch, and French are explicit test fixtures. The same release makes the extension code compatible with the broad PHP 7.0.8 through 8.4 range used across supported iTop generations and adds early-warning checks for future PHP versions.
 
 ## Problem
 
 The current template reads iTop's `spreadsheet` HTML export with `Web.Page`, promotes the translated display labels to column names, and then addresses English names such as `Ref`, `id (Primary Key)`, and `New value`. A user whose iTop language is not English receives different headings, so Power Query stops at its first missing English column. Translated enumeration values can also alter filtering without producing an obvious schema error.
 
-The extension documentation currently advertises PHP 8.1 as its maximum even though iTop 3.2 supports PHP 8.1 through 8.3. The extension has no automated compatibility validation.
+The extension documentation currently advertises PHP 8.1 as its maximum even though different supported iTop releases cover a wider PHP range. The extension has no automated compatibility validation, so its simple code can become artificially constrained by stale documentation or unnoticed deprecations.
 
 ## Scope
 
@@ -19,7 +19,8 @@ The extension documentation currently advertises PHP 8.1 as its maximum even tho
 - Explicitly validate English, German, Dutch, and French response fixtures.
 - Support all other iTop left-to-right languages through the same internal-code contract.
 - Detect login pages, invalid query identifiers, malformed CSV, and schema drift with actionable errors.
-- Verify the extension on PHP 8.1 and PHP 8.2.
+- Verify the extension code on every PHP minor line from 7.0 through 8.4, with PHP 7.0.8 as the precise minimum.
+- Run a non-blocking PHP nightly check to identify future incompatibilities before a new PHP version is supported by iTop.
 - Release the extension and template with synchronized version 1.1.0 metadata.
 - Store editable Power BI project sources alongside the generated `.pbit` artifact.
 
@@ -28,7 +29,8 @@ The extension documentation currently advertises PHP 8.1 as its maximum even tho
 - Translating report titles, visual captions, or filters.
 - Certifying right-to-left report presentation.
 - Adding a new iTop webservice or changing iTop core.
-- Claiming PHP 8.3 compatibility without adding it to the verification matrix.
+- Claiming that an iTop/PHP combination is supported when that iTop release does not support the PHP version.
+- Treating a successful PHP nightly syntax check as a supported production runtime.
 - Persisting iTop credentials in source control or generated release assets.
 
 ## Repositories and Ownership
@@ -78,9 +80,15 @@ The connector fails before model shaping with a concise diagnostic when:
 
 Errors name the affected query, list missing field codes, and direct the operator to verify credentials and the current Query Phrasebook URL. Credentials are never included in diagnostics.
 
-## PHP 8.2 Compatibility
+## Broad PHP Compatibility
 
-The extension remains compatible with PHP 8.1 and adds PHP 8.2 to its automated matrix. Tests treat warnings, deprecations, and notices from extension loading as failures. Validation covers:
+The extension uses syntax and APIs compatible with PHP 7.0.8 through PHP 8.4 and does not declare an artificial maximum PHP version. Blocking CI covers PHP 7.0, 7.1, 7.2, 7.3, 7.4, 8.0, 8.1, 8.2, 8.3, and 8.4. Tests treat warnings, deprecations, and notices from extension loading as failures.
+
+Extension-code compatibility and installed-runtime compatibility are separate claims. Operators must use a PHP version supported by their chosen iTop release. For example, extension code passing PHP 8.4 tests does not make iTop 3.2.2 compatible with PHP 8.4.
+
+The code follows the oldest supported syntax level and avoids version-specific branches unless an unavoidable platform difference is proven. A non-blocking PHP nightly job detects future parser, runtime, and deprecation problems. Nightly success is informational until the relevant PHP release and iTop combination are officially supported.
+
+Validation covers:
 
 - PHP syntax for every extension PHP file;
 - XML parsing for manifests and Query Phrasebook data;
@@ -89,13 +97,15 @@ The extension remains compatible with PHP 8.1 and adds PHP 8.2 to its automated 
 - installer method loading and same-version no-op behavior;
 - presence and shape of all three Query Phrasebook records.
 
-A containerized PHP 8.2 run is attempted locally. Hosted CI is the authoritative second environment when local Docker access is unavailable. Full production compatibility is claimed only for the tested extension boundary; an installed iTop smoke test is recorded separately if an environment is available.
+Containerized runs are attempted locally for representative legacy and current PHP versions, including PHP 8.2 and 8.4. Hosted CI is the authoritative complete matrix when local Docker access is unavailable. Full production compatibility is claimed only for tested iTop/PHP intersections; installed iTop smoke tests are recorded separately when environments are available.
 
 ## Testing
 
 ### Automated extension tests
 
-- Run on PHP 8.1 and 8.2.
+- Run blocking jobs on PHP 7.0 through 7.4 and PHP 8.0 through 8.4.
+- Enforce PHP 7.0.8 as the minimum supported patch level.
+- Run PHP nightly as a non-blocking early-warning job.
 - Fail if any code file exceeds 200 lines.
 - Fail on syntax, XML, version, installer, or Query Phrasebook contract errors.
 
@@ -127,7 +137,7 @@ After both pull requests are independently reviewed, green, and merged at their 
 2. Confirm README instructions match the released artifacts.
 3. Create GitHub releases from the exact merge commits.
 4. Attach the verified extension package and `.pbit` template.
-5. Document PHP 8.1/8.2 results, locale fixture results, and the live-refresh verification boundary.
+5. Document the broad PHP matrix, PHP nightly result, locale fixture results, supported iTop/PHP intersections, and the live-refresh verification boundary.
 
 ## Acceptance Criteria
 
@@ -136,7 +146,9 @@ After both pull requests are independently reviewed, green, and merged at their 
 - Other LTR locales use the same locale-neutral contract without additional mappings.
 - Existing report model names and functionality remain unchanged.
 - Authentication and schema errors are actionable and do not expose credentials.
-- PHP 8.1 and PHP 8.2 extension validation passes with deprecations treated as failures.
+- PHP 7.0 through 8.4 extension validation passes with deprecations treated as failures.
+- PHP nightly runs as a visible non-blocking compatibility signal.
+- Documentation distinguishes extension-code compatibility from supported iTop/PHP runtime combinations.
 - Extension and template release metadata are synchronized at 1.1.0.
 - All code files remain at or below 200 lines.
 - Pull requests are issue-linked, assigned to `dutch2005`, labeled, milestone-grouped, and independently reviewed.
