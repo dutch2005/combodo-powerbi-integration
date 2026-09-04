@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $taskRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $taskBuildScript = Join-Path $taskRoot 'scripts/build-release.ps1'
-$taskArchive = Join-Path $taskRoot 'dist/combodo-powerbi-integration-1.1.0.zip'
+$taskArchive = Join-Path $taskRoot 'dist/combodo-powerbi-integration-1.1.1.zip'
 $taskEolAttribute = git -C $taskRoot check-attr eol -- extension.xml
 
 if (($taskEolAttribute -join "`n") -notmatch 'eol: lf') {
