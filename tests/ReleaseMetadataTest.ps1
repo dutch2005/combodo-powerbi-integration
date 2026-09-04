@@ -12,16 +12,32 @@ if (-not $taskMatrixMatch.Success) {
     throw 'Blocking PHP matrix job is missing.'
 }
 $taskMatrix = $taskMatrixMatch.Value
+if ($taskMatrix -notmatch '(?m)^    name: PHP \$\{\{ matrix\.php \}\} \(Docker\)\s*$') {
+    throw 'Blocking PHP matrix must be the Docker job.'
+}
+if ($taskMatrix -notmatch '(?m)^\s+docker run --rm\s*$') {
+    throw 'Blocking PHP matrix must execute its contract in Docker.'
+}
 foreach ($taskVersion in $taskRequiredPhp) {
     if ($taskMatrix -notmatch ('(?m)^\s+- "' + [regex]::Escape($taskVersion) + '"\s*$')) {
         throw "Blocking Docker matrix is missing PHP $taskVersion."
     }
 }
-if ($taskWorkflow -notmatch '(?ms)php-nightly:.*?PHP 8\.6 nightly.*?continue-on-error:\s*true') {
+$taskNightlyMatch = [regex]::Match($taskWorkflow, '(?ms)^  php-nightly:.*$')
+if (-not $taskNightlyMatch.Success) {
+    throw 'PHP 8.6 must remain a separate informational job.'
+}
+$taskNightly = $taskNightlyMatch.Value
+if ($taskNightly -notmatch '(?m)^    name: PHP 8\.6 nightly \(informational\)\s*$' -or
+    $taskNightly -notmatch '(?m)^    continue-on-error: true\s*$') {
     throw 'PHP 8.6 must remain a separate informational continue-on-error job.'
 }
-if ($taskMatrix -match '8\.6') {
+if ($taskMatrix -match '(?m)^\s+- "8\.6"\s*$') {
     throw 'PHP 8.6 must not be part of the blocking Docker matrix.'
+}
+if ($taskNightly -notmatch '(?m)^          php-version: "8\.6"\s*$' -or
+    $taskNightly -notmatch '(?m)^          php -l module\.combodo-powerbi-integration\.php') {
+    throw 'The informational PHP 8.6 job must install and execute PHP 8.6.'
 }
 if ([string]$taskManifest.extension.version -ne '1.1.1') {
     throw 'extension.xml must declare version 1.1.1.'
@@ -29,7 +45,13 @@ if ([string]$taskManifest.extension.version -ne '1.1.1') {
 if ($taskModule -notmatch "combodo-powerbi-integration/1\.1\.1") {
     throw 'module registration must declare version 1.1.1.'
 }
-if ($taskBuild -notmatch 'combodo-powerbi-integration-1\.1\.1') {
-    throw 'Release packaging must use the 1.1.1 archive and directory names.'
+$taskExpectedBuildLines = @(
+    '$taskVersionRoot = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.1''))',
+    '$taskArchivePath = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.1.zip''))'
+)
+foreach ($taskExpectedLine in $taskExpectedBuildLines) {
+    if ($taskBuild -notmatch ('(?m)^' + [regex]::Escape($taskExpectedLine) + '\s*$')) {
+        throw "Release packaging assignment is not exact: $taskExpectedLine"
+    }
 }
 Write-Output 'PASS: release metadata is synchronized for PHP 8.5 and extension 1.1.1.'
