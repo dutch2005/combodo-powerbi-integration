@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $taskRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $taskBuildScript = Join-Path $taskRoot 'scripts/build-release.ps1'
-$taskArchive = Join-Path $taskRoot 'dist/combodo-powerbi-integration-1.1.1.zip'
+$taskArchive = Join-Path $taskRoot 'dist/combodo-powerbi-integration-1.1.2.zip'
 $taskEolAttribute = git -C $taskRoot check-attr eol -- extension.xml
 
 if (($taskEolAttribute -join "`n") -notmatch 'eol: lf') {
@@ -18,6 +18,10 @@ if (-not (Test-Path -LiteralPath $taskArchive -PathType Leaf)) {
 	throw 'Release archive was not created.'
 }
 $taskFirstHash = (Get-FileHash -LiteralPath $taskArchive -Algorithm SHA256).Hash
+$taskExpectedHash = '77A9C95FBBF4455768267C5B958773AD36AA6011E1D41D2DCA43989E407C9ED9'
+if ($taskFirstHash -cne $taskExpectedHash) {
+	throw "Release archive must match the cross-platform canonical SHA-256 $taskExpectedHash."
+}
 
 & $taskBuildScript
 $taskSecondHash = (Get-FileHash -LiteralPath $taskArchive -Algorithm SHA256).Hash

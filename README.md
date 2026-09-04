@@ -10,7 +10,7 @@ The extension does not add a public webservice or store Power BI credentials. Po
 
 ## Version compatibility
 
-Version 1.1.1 keeps production code compatible with PHP 7.0 syntax and validates the extension in blocking Docker CI jobs on PHP 7.0.8 through 8.5. A separate informational, non-blocking PHP 8.6 job is an early warning for future changes.
+Version 1.1.2 keeps production code compatible with PHP 7.0 syntax and validates the extension in blocking Docker CI jobs on PHP 7.0.8 through 8.5. A separate informational, non-blocking PHP 8.6 job is an early warning for future changes.
 
 This is an **extension-code** compatibility range, not a deployable-PHP support promise. iTop itself, including the installed iTop version and its requirements, controls which PHP versions are safe to run. Always check the current [official iTop requirements](https://www.itophub.io/wiki/page?id=latest%3Ainstall%3Arequirements) before changing the server runtime.
 
@@ -18,7 +18,7 @@ The automated harness validates extension loading with minimal iTop API test dou
 
 ## Locale-neutral Power BI template
 
-Extension 1.1.1 pairs with the matching [Power BI template 1.1.1 proposed in PR #2](https://github.com/Combodo/combodo-powerbi-template/pull/2). The template converts QueryOQL details URLs to the standard export endpoint, requests UTF-8 CSV with `no_localize=1`, fixes the date format, addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`, and extends its calendars through the current year at refresh.
+Extension 1.1.2 pairs with the matching [Power BI template 1.1.1 proposed in PR #2](https://github.com/Combodo/combodo-powerbi-template/pull/2). The template converts QueryOQL details URLs to the standard export endpoint, requests UTF-8 CSV with `no_localize=1`, fixes the date format, addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`, and extends its calendars through the current year at refresh.
 
 The data refresh therefore works independently of the iTop account's display language for supported left-to-right languages. English, German, Dutch, and French are explicit fixtures. Report page captions remain English, and right-to-left presentation is not certified.
 
@@ -63,7 +63,7 @@ Build and verify the deterministic release archive:
 pwsh -NoProfile -File tests/BuildReleaseTest.ps1
 ```
 
-The resulting archive is `dist/combodo-powerbi-integration-1.1.1.zip`. The build prints its SHA-256 hash.
+The resulting archive is `dist/combodo-powerbi-integration-1.1.2.zip`. The build uses stored ZIP entries so Windows and Linux produce the same SHA-256 hash.
 
 ## More information
 
