@@ -1,1 +1,10 @@
+.git
+.github
+.gitignore
+SECURITY.md
+dist
+docs
+exclude.txt
 README.md
+scripts
+tests
