@@ -15,14 +15,14 @@ if (-not $taskModuleMatch.Success) {
 	throw 'Unable to read the registered module version.'
 }
 $taskModuleVersion = $taskModuleMatch.Groups[1].Value
-if ($taskManifestVersion -ne '1.1.0' -or $taskModuleVersion -ne '1.1.0') {
-	throw "Release versions must both be 1.1.0 (manifest=$taskManifestVersion, module=$taskModuleVersion)."
+if ($taskManifestVersion -ne '1.1.1' -or $taskModuleVersion -ne '1.1.1') {
+	throw "Release versions must both be 1.1.1 (manifest=$taskManifestVersion, module=$taskModuleVersion)."
 }
 
 $taskDistRoot = [System.IO.Path]::GetFullPath((Join-Path $taskRoot 'dist'))
-$taskVersionRoot = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot 'combodo-powerbi-integration-1.1.0'))
+$taskVersionRoot = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot 'combodo-powerbi-integration-1.1.1'))
 $taskPackageRoot = Join-Path $taskVersionRoot 'combodo-powerbi-integration'
-$taskArchivePath = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot 'combodo-powerbi-integration-1.1.0.zip'))
+$taskArchivePath = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot 'combodo-powerbi-integration-1.1.1.zip'))
 $taskDistPrefix = $taskDistRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 $taskRootPrefix = $taskRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 
