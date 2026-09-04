@@ -42,19 +42,22 @@ if ($taskNightly -notmatch '(?m)^          php-version: "8\.6"\s*$' -or
     $taskNightly -notmatch '(?m)^          php -l module\.combodo-powerbi-integration\.php') {
     throw 'The informational PHP 8.6 job must install and execute PHP 8.6.'
 }
-if ([string]$taskManifest.extension.version -ne '1.1.1') {
-    throw 'extension.xml must declare version 1.1.1.'
+if ([string]$taskManifest.extension.version -ne '1.1.2') {
+    throw 'extension.xml must declare version 1.1.2.'
 }
-if ($taskModule -notmatch "combodo-powerbi-integration/1\.1\.1") {
-    throw 'module registration must declare version 1.1.1.'
+if ($taskModule -notmatch "combodo-powerbi-integration/1\.1\.2") {
+    throw 'module registration must declare version 1.1.2.'
 }
 $taskExpectedBuildLines = @(
-    '$taskVersionRoot = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.1''))',
-    '$taskArchivePath = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.1.zip''))'
+    '$taskVersionRoot = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.2''))',
+    '$taskArchivePath = [System.IO.Path]::GetFullPath((Join-Path $taskDistRoot ''combodo-powerbi-integration-1.1.2.zip''))'
 )
 foreach ($taskExpectedLine in $taskExpectedBuildLines) {
     if ($taskBuild -notmatch ('(?m)^' + [regex]::Escape($taskExpectedLine) + '\s*$')) {
         throw "Release packaging assignment is not exact: $taskExpectedLine"
     }
 }
-Write-Output 'PASS: release metadata is synchronized for PHP 8.5 and extension 1.1.1.'
+if ($taskBuild -notmatch "write-deterministic-zip\.ps1") {
+    throw 'Release archives must use the cross-platform deterministic ZIP writer.'
+}
+Write-Output 'PASS: release metadata is synchronized for PHP 8.5 and extension 1.1.2.'
