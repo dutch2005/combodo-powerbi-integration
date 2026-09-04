@@ -57,7 +57,7 @@ foreach ($taskExpectedLine in $taskExpectedBuildLines) {
         throw "Release packaging assignment is not exact: $taskExpectedLine"
     }
 }
-if ($taskBuild -notmatch '\[System\.IO\.Compression\.CompressionLevel\]::NoCompression') {
-    throw 'Release archives must use stored entries for cross-platform byte identity.'
+if ($taskBuild -notmatch "write-deterministic-zip\.ps1") {
+    throw 'Release archives must use the cross-platform deterministic ZIP writer.'
 }
 Write-Output 'PASS: release metadata is synchronized for PHP 8.5 and extension 1.1.2.'

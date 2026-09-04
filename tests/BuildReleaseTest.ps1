@@ -18,7 +18,7 @@ if (-not (Test-Path -LiteralPath $taskArchive -PathType Leaf)) {
 	throw 'Release archive was not created.'
 }
 $taskFirstHash = (Get-FileHash -LiteralPath $taskArchive -Algorithm SHA256).Hash
-$taskExpectedHash = '77A9C95FBBF4455768267C5B958773AD36AA6011E1D41D2DCA43989E407C9ED9'
+$taskExpectedHash = 'F99092535CCED4D72754DF28102BD76F6099679D1E24341118E8E4F169D9297F'
 if ($taskFirstHash -cne $taskExpectedHash) {
 	throw "Release archive must match the cross-platform canonical SHA-256 $taskExpectedHash."
 }

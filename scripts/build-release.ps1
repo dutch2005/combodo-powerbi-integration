@@ -86,40 +86,10 @@ foreach ($taskRelativePath in $taskRuntimeFiles) {
 	[System.IO.File]::WriteAllText($taskDestinationPath, $taskText, $taskUtf8WithoutBom)
 }
 
-Add-Type -AssemblyName System.IO.Compression
-$taskArchiveStream = [System.IO.File]::Open(
-	$taskArchivePath,
-	[System.IO.FileMode]::CreateNew,
-	[System.IO.FileAccess]::ReadWrite,
-	[System.IO.FileShare]::None
-)
-$taskArchive = [System.IO.Compression.ZipArchive]::new(
-	$taskArchiveStream,
-	[System.IO.Compression.ZipArchiveMode]::Create,
-	$false
-)
-$taskTimestamp = [System.DateTimeOffset]::Parse('2000-01-01T00:00:00Z')
-
-try {
-	$taskFiles = Get-ChildItem -LiteralPath $taskPackageRoot -File -Recurse | Sort-Object FullName
-	foreach ($taskFile in $taskFiles) {
-		$taskRelativePath = $taskFile.FullName.Substring($taskPackageRoot.Length + 1).Replace('\', '/')
-		$taskEntryName = 'combodo-powerbi-integration/' + $taskRelativePath
-		$taskEntry = $taskArchive.CreateEntry($taskEntryName, [System.IO.Compression.CompressionLevel]::NoCompression)
-		$taskEntry.LastWriteTime = $taskTimestamp
-		$taskInput = [System.IO.File]::OpenRead($taskFile.FullName)
-		$taskOutput = $taskEntry.Open()
-		try {
-			$taskInput.CopyTo($taskOutput)
-		} finally {
-			$taskOutput.Dispose()
-			$taskInput.Dispose()
-		}
-	}
-} finally {
-	$taskArchive.Dispose()
-	$taskArchiveStream.Dispose()
-}
+& (Join-Path $PSScriptRoot 'write-deterministic-zip.ps1') `
+	-SourceRoot $taskPackageRoot `
+	-Destination $taskArchivePath `
+	-EntryPrefix 'combodo-powerbi-integration'
 
 $taskHash = Get-FileHash -LiteralPath $taskArchivePath -Algorithm SHA256
 Write-Output "Built $taskArchivePath"
