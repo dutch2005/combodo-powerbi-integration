@@ -6,7 +6,7 @@ This iTop extension installs three Query Phrasebook entries used by the matching
 2. The list of teams.
 3. The first team assigned to each included request.
 
-The extension does not add a public webservice or store Power BI credentials. Power BI reads the standard iTop Query Phrasebook export URLs using the account supplied in the template parameters.
+The extension does not add a public webservice or store Power BI credentials. Power BI template 1.1.0 accepts either QueryOQL details URLs or standard Query Phrasebook export URLs and uses the account supplied in the template parameters.
 
 ## Version compatibility
 
@@ -24,7 +24,7 @@ The automated harness validates extension loading with minimal iTop API test dou
 
 ## Locale-neutral Power BI template
 
-The coordinated 1.1.0 release will pair this extension with [Power BI template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/pull/2). Do not treat the template as released until that linked pull request is merged and its release artifact is published. The template requests UTF-8 CSV exports with `no_localize=1`, fixes the date format, and addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`.
+The coordinated 1.1.0 release will pair this extension with [Power BI template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/pull/2). Do not treat the template as released until that linked pull request is merged and its release artifact is published. The template converts QueryOQL details URLs to the standard export endpoint, requests UTF-8 CSV with `no_localize=1`, fixes the date format, addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`, and extends its calendars through the current year at refresh.
 
 The data refresh therefore works independently of the iTop account's display language for supported left-to-right languages. English, German, Dutch, and French are explicit fixtures. Report page captions remain English, and right-to-left presentation is not certified.
 
@@ -43,7 +43,7 @@ Those messages refer to translated column headings, not empty record values.
 2. Place the `combodo-powerbi-integration` directory in iTop's `extensions` directory.
 3. Run iTop setup and keep **Reporting for PowerBI - Helpdesk view** selected.
 4. Open **Query Phrasebook** and verify all three Power BI queries are present.
-5. Open Power BI template 1.1.0 and enter the current three Query Phrasebook URLs plus the dedicated iTop account credentials.
+5. Open Power BI template 1.1.0 and enter either the three QueryOQL details URLs or their `export-v2.php` URLs, plus the dedicated iTop account credentials.
 6. Keep Power BI's data-source credential mode set to Anonymous because the M queries supply the Basic Authorization header themselves.
 7. Refresh all tables before publishing the report.
 
