@@ -24,7 +24,7 @@ The automated harness validates extension loading with minimal iTop API test dou
 
 ## Locale-neutral Power BI template
 
-The coordinated 1.1.0 release will pair this extension with [Power BI template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/pull/2). Do not treat the template as released until that linked pull request is merged and its release artifact is published. The template converts QueryOQL details URLs to the standard export endpoint, requests UTF-8 CSV with `no_localize=1`, fixes the date format, addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`, and extends its calendars through the current year at refresh.
+Version 1.1.0 pairs this extension with [Power BI template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/releases/tag/v1.1.0). The template converts QueryOQL details URLs to the standard export endpoint, requests UTF-8 CSV with `no_localize=1`, fixes the date format, addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`, and extends its calendars through the current year at refresh.
 
 The data refresh therefore works independently of the iTop account's display language for supported left-to-right languages. English, German, Dutch, and French are explicit fixtures. Report page captions remain English, and right-to-left presentation is not certified.
 
@@ -75,7 +75,7 @@ The resulting archive is `dist/combodo-powerbi-integration-1.1.0.zip`. The build
 
 - [iTop extension documentation](https://www.itophub.io/wiki/page?id=extensions%3Acombodo-powerbi-integration)
 - [Official Power BI template repository](https://github.com/Combodo/combodo-powerbi-template)
-- [Coordinated locale-neutral template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/pull/2)
+- [Coordinated locale-neutral template 1.1.0](https://github.com/dutch2005/combodo-powerbi-template/releases/tag/v1.1.0)
 - [iTop Hub Store](https://store.itophub.io/en_US/taxons/all-extensions)
 
 This module is sponsored, led, and supported by [Combodo](https://www.combodo.com).
