@@ -81,6 +81,16 @@ class SetupLog
 	}
 }
 
+class Dict
+{
+	public static $entries = array();
+
+	public static function Add($locale, $language, $description, $entries)
+	{
+		self::$entries[] = array($locale, $language, $description, $entries);
+	}
+}
+
 if (!defined('APPCONF')) {
 	define('APPCONF', sys_get_temp_dir().DIRECTORY_SEPARATOR.'combodo-powerbi-tests'.DIRECTORY_SEPARATOR);
 }

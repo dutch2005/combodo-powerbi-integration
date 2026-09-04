@@ -3,6 +3,8 @@
 function registerExtensionContractTests(TestHarness $harness, $root)
 {
 	require_once $root.'/module.combodo-powerbi-integration.php';
+	require_once $root.'/model.combodo-powerbi-integration.php';
+	require_once $root.'/en.dict.combodo-powerbi-integration.php';
 
 	$harness->run('module registers the 1.1.0 identity', function () use ($harness) {
 		$harness->assertSame(1, count(SetupWebPage::$modules), 'Exactly one module must be registered');
@@ -26,6 +28,7 @@ function registerExtensionContractTests(TestHarness $harness, $root)
 		XMLDataLoader::reset();
 		PowerBiIntegrationInstaller::AfterDatabaseCreation(new Config('EN US'), '1.1.0', '1.1.0');
 		$harness->assertSame(0, count(XMLDataLoader::$loads), 'Same-version setup must not reload QueryOQL data');
+		$harness->assertSame(0, count(XMLDataLoader::$sessions), 'Same-version setup must not open a loader session');
 	});
 
 	$harness->run('upgrade loads the English fallback data once', function () use ($harness) {
@@ -33,7 +36,15 @@ function registerExtensionContractTests(TestHarness $harness, $root)
 		PowerBiIntegrationInstaller::AfterDatabaseCreation(new Config('DE DE'), '1.0.1', '1.1.0');
 		$harness->assertSame(1, count(XMLDataLoader::$loads), 'Upgrade must load one data file');
 		$harness->assertSame('en_us.data.combodo-powerbi-integration.xml', basename(XMLDataLoader::$loads[0][0]), 'Missing locale must use English data');
+		$harness->assertSame(array(false, true), array(XMLDataLoader::$loads[0][1], XMLDataLoader::$loads[0][2]), 'Loader validation flags changed');
 		$harness->assertSame(array(array('start', 'test-change'), array('end')), XMLDataLoader::$sessions, 'Loader session lifecycle changed');
+	});
+
+	$harness->run('upgrade loads an existing configured locale file', function () use ($harness) {
+		XMLDataLoader::reset();
+		PowerBiIntegrationInstaller::AfterDatabaseCreation(new Config('EN US'), '1.0.1', '1.1.0');
+		$harness->assertSame(1, count(XMLDataLoader::$loads), 'Configured locale must load once');
+		$harness->assertSame('en_us.data.combodo-powerbi-integration.xml', basename(XMLDataLoader::$loads[0][0]), 'Configured locale file was not selected');
 	});
 
 	$harness->run('extension manifest declares version 1.1.0', function () use ($harness, $root) {
@@ -50,12 +61,24 @@ function registerExtensionContractTests(TestHarness $harness, $root)
 		foreach ($data->QueryOQL as $query) {
 			$id = (string) $query['id'];
 			$fields = preg_split('/\s*,\s*/', trim((string) $query->fields));
-			$queries[$id] = $fields;
+			$oql = preg_replace('/\s+/', ' ', trim((string) $query->oql));
+			$queries[$id] = array('fields' => $fields, 'oql' => $oql);
 		}
 		$harness->assertSame(array(1, 2, 3), array_keys($queries), 'Query ids changed');
-		$harness->assertTrue(in_array('ref', $queries['1'], true), 'Query 1 must expose ref');
-		$harness->assertSame(array('id', 'name'), $queries['2'], 'Query 2 fields changed');
-		$harness->assertSame(array('newvalue', 'objkey'), $queries['3'], 'Query 3 fields changed');
+		$expectedFields = array(
+			1 => preg_split('/,/', 'id,operational_status,status,ref,org_id,org_name,caller_id,caller_name,team_id,team_id_friendlyname,agent_id,agent_name,impact,urgency,priority,origin,request_type,start_date,end_date,last_update,assignment_date,resolution_date,last_pending_date,sla_tto_passed,sla_ttr_passed,time_spent,resolution_code,tto_escalation_deadline,ttr_escalation_deadline,service_name'),
+			2 => array('id', 'name'),
+			3 => array('newvalue', 'objkey'),
+		);
+		$expectedOql = array(
+			1 => "SELECT UserRequest WHERE last_update>= DATE_SUB(DATE_FORMAT(NOW(),'%Y-%m-01'), INTERVAL 12 MONTH) AND last_update<= DATE_FORMAT(NOW(),'%Y-%m-31')",
+			2 => 'SELECT Team',
+			3 => "SELECT CMDBChangeOpSetAttributeScalar AS sa JOIN UserRequest AS u ON sa.objkey=u.id JOIN CMDBChange AS c ON sa.change = c.id WHERE sa.objclass ='UserRequest' AND sa.attcode = 'team_id' AND sa.oldvalue!=sa.newvalue AND sa.oldvalue='0' AND sa.objclass='UserRequest' AND u.last_update>= DATE_SUB(DATE_FORMAT(NOW(),'%Y-%m-01'), INTERVAL 12 MONTH) AND u.last_update<= DATE_FORMAT(NOW(),'%Y-%m-31')",
+		);
+		foreach (array(1, 2, 3) as $id) {
+			$harness->assertSame($expectedFields[$id], $queries[$id]['fields'], 'Query '.$id.' fields changed');
+			$harness->assertSame($expectedOql[$id], $queries[$id]['oql'], 'Query '.$id.' OQL changed');
+		}
 	});
 
 	$harness->run('all code files stay within 200 lines', function () use ($harness, $root) {

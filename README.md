@@ -24,7 +24,7 @@ The automated harness validates extension loading with minimal iTop API test dou
 
 ## Locale-neutral Power BI template
 
-Use extension 1.1.0 with Power BI template 1.1.0. That template requests CSV exports with `no_localize=1` and addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`.
+The coordinated 1.1.0 release will pair this extension with Power BI template 1.1.0. Do not treat the template as available until its linked repository release is published. The template requests CSV exports with `no_localize=1` and addresses stable internal field codes such as `ref`, `id`, `newvalue`, and `objkey`.
 
 The data refresh therefore works independently of the iTop account's display language for supported left-to-right languages. English, German, Dutch, and French are explicit fixtures. Report page captions remain English, and right-to-left presentation is not certified.
 

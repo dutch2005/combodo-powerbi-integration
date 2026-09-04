@@ -38,7 +38,22 @@ jobs:
           -v "$GITHUB_WORKSPACE:/app:ro"
           -w /app
           "php:${{ matrix.php }}-cli"
-          php -d error_reporting=-1 -d display_errors=1 tests/run.php
+          sh -lc
+          "php -l module.combodo-powerbi-integration.php &&
+          php -l model.combodo-powerbi-integration.php &&
+          php -l en.dict.combodo-powerbi-integration.php &&
+          php -d error_reporting=-1 -d display_errors=1 tests/run.php"
+
+  release-package:
+    name: Deterministic release package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build twice and verify archive
+        shell: pwsh
+        run: ./tests/BuildReleaseTest.ps1
 
   php-nightly:
     name: PHP 8.6 nightly (informational)
@@ -55,4 +70,8 @@ jobs:
           coverage: none
 
       - name: Run extension contract
-        run: php -d error_reporting=-1 -d display_errors=1 tests/run.php
+        run: >-
+          php -l module.combodo-powerbi-integration.php &&
+          php -l model.combodo-powerbi-integration.php &&
+          php -l en.dict.combodo-powerbi-integration.php &&
+          php -d error_reporting=-1 -d display_errors=1 tests/run.php
