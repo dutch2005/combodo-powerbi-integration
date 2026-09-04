@@ -1,0 +1,58 @@
+name: PHP compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  php-matrix:
+    name: PHP ${{ matrix.php }} (Docker)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - "7.0.8"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Run extension contract
+        run: >-
+          docker run --rm
+          -v "$GITHUB_WORKSPACE:/app:ro"
+          -w /app
+          "php:${{ matrix.php }}-cli"
+          php -d error_reporting=-1 -d display_errors=1 tests/run.php
+
+  php-nightly:
+    name: PHP 8.6 nightly (informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install PHP nightly
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.6"
+          coverage: none
+
+      - name: Run extension contract
+        run: php -d error_reporting=-1 -d display_errors=1 tests/run.php
